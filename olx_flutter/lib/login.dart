@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'route/routes.dart';
 
 class LoginPage extends StatefulWidget {
@@ -15,6 +16,12 @@ class _LoginPageState extends State<LoginPage> {
   String? _errorMessage;
 
   Future<void> _login() async {
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      _showNoInternetDialog(); // Show dialog if no internet
+      return;
+    }
+
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       setState(() {
         _errorMessage = 'Email dan password tidak boleh kosong';
@@ -73,9 +80,32 @@ class _LoginPageState extends State<LoginPage> {
     } catch (error) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Terjadi kesalahan jaringan: $error';
+        _errorMessage =
+            'Gagal terhubung ke server. Silakan periksa koneksi Anda dan coba lagi.';
       });
     }
+  }
+
+  // Method to show dialog when there's no internet connection
+  void _showNoInternetDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Koneksi Terputus'),
+          content: Text(
+              'Tidak ada koneksi internet. Pastikan Anda terhubung ke jaringan dan coba lagi.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('Tutup'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<bool> _onWillPop() async {
@@ -179,9 +209,21 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 if (_errorMessage != null) ...[
                   SizedBox(height: 16),
-                  Text(
-                    _errorMessage!,
-                    style: TextStyle(color: Colors.red, fontSize: 14),
+                  Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.red[100], // Light red background
+                      borderRadius: BorderRadius.circular(8), // Rounded corners
+                      border: Border.all(color: Colors.red), // Red border
+                    ),
+                    child: Text(
+                      _errorMessage!,
+                      style: TextStyle(
+                        color: Colors.red, // Red text color
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14, // Slightly larger font size
+                      ),
+                    ),
                   ),
                 ],
                 SizedBox(height: 16),

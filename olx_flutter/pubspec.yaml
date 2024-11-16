@@ -17,6 +17,7 @@ dependencies:
   image_picker: ^0.8.7+3  # Versi terbaru dari image_picker
   mime: ^1.0.0
   http_parser: ^4.0.0
+  connectivity_plus: ^6.1.0
   # flushbar: ^1.10.0
 
   # Cupertino Icons for iOS style icons

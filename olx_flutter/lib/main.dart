@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'route/routes.dart';
 
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       initialRoute: AppRoutes.login,
+      debugShowCheckedModeBanner: false,
       onGenerateRoute: AppRoutes.generateRoute,
     );
   }
@@ -55,6 +57,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _fetchCarData() async {
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      setState(() {
+        _errorMessage = 'Gagal terhubung koneksi';
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -83,7 +93,8 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Terjadi kesalahan jaringan: $e';
+        _errorMessage =
+            'Terjadi kesalahan jaringan. Silakan periksa koneksi Anda dan coba lagi.';
         _isLoading = false;
       });
     }
@@ -98,8 +109,6 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         _carList.removeWhere((car) => car['id'] == id);
       });
-
-      // Show success SnackBar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Mobil berhasil dihapus!'),
@@ -108,7 +117,6 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       );
     } else {
-      // Show failure SnackBar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Gagal menghapus mobil!'),
@@ -120,14 +128,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _logout() async {
-    // Mengambil instance SharedPreferences
     final prefs = await SharedPreferences.getInstance();
-
-    // Menghapus data sesi yang tersimpan (misalnya token atau status login)
-    await prefs.remove(
-        'token'); // Gantilah 'token' dengan nama key yang sesuai untuk token/login session
-
-    // Navigasi ke halaman login setelah logout
+    await prefs.remove('token');
     Navigator.pushReplacementNamed(context, AppRoutes.login);
   }
 
@@ -137,7 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title:
             Text(widget.title, style: TextStyle(fontWeight: FontWeight.bold)),
-        automaticallyImplyLeading: false, // Menghilangkan tombol back
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: Icon(Icons.refresh, color: Colors.white),
@@ -162,9 +164,30 @@ class _MyHomePageState extends State<MyHomePage> {
             )
           : _errorMessage != null
               ? Center(
-                  child: Text(
-                    _errorMessage ?? 'Terjadi kesalahan',
-                    style: TextStyle(color: Colors.red, fontSize: 16),
+                  child: Container(
+                    margin: EdgeInsets.symmetric(horizontal: 16),
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.red[50],
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.redAccent, width: 1),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.error_outline, color: Colors.redAccent),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _errorMessage ?? 'Terjadi kesalahan',
+                            style: TextStyle(
+                              color: Colors.red[800],
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 )
               : ListView.builder(
@@ -219,7 +242,6 @@ class _MyHomePageState extends State<MyHomePage> {
                         trailing: IconButton(
                           icon: Icon(Icons.delete, color: Colors.red),
                           onPressed: () async {
-                            // Konfirmasi sebelum menghapus
                             bool? confirmDelete = await showDialog<bool>(
                               context: context,
                               builder: (BuildContext context) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'route/routes.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -14,8 +15,8 @@ class _RegisterPageState extends State<RegisterPage> {
   final _nameController = TextEditingController();
   bool _isLoading = false;
   String? _errorMessage;
-  bool _isEmailValid = true; // Track email validation status
-  bool _isPasswordValid = true; // Track password validation status
+  bool _isEmailValid = true;
+  bool _isPasswordValid = true;
 
   String? _validateEmail(String value) {
     final regex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
@@ -87,7 +88,11 @@ class _RegisterPageState extends State<RegisterPage> {
       } else if (response.statusCode == 400) {
         final responseData = json.decode(response.body);
         setState(() {
-          _errorMessage = 'Data tidak valid: ${responseData['message']}';
+          _errorMessage = 'Email sudah terdaftar: ${responseData['message']}';
+        });
+      } else if (response.statusCode == 500) {
+        setState(() {
+          _errorMessage = 'Terjadi kesalahan server, coba lagi nanti.';
         });
       } else {
         final responseData = json.decode(response.body);
@@ -98,8 +103,24 @@ class _RegisterPageState extends State<RegisterPage> {
     } catch (error) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Terjadi kesalahan jaringan';
+        _errorMessage =
+            'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.';
       });
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Kesalahan Koneksi'),
+          content: Text(
+              'Tidak ada koneksi internet. Pastikan Anda terhubung ke jaringan dan coba lagi.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Tutup'),
+            ),
+          ],
+        ),
+      );
     }
   }
 

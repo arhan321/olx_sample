@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'dart:io';
@@ -39,6 +40,14 @@ class _AddCarPageState extends State<AddCarPage> {
   }
 
   Future<void> _submitCarData() async {
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      setState(() {
+        _errorMessage = 'Gagal terhubung koneksi';
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -49,7 +58,6 @@ class _AddCarPageState extends State<AddCarPage> {
       Uri.parse('https://api.triastrapersada.com/api/v1/mobil'),
     );
 
-    // Validate and collect the form fields
     request.fields['nama'] = _namaController.text.trim();
     request.fields['merk'] = _merkController.text.trim();
     request.fields['model'] = _modelController.text.trim();
@@ -60,7 +68,6 @@ class _AddCarPageState extends State<AddCarPage> {
     request.fields['tahun'] = _tahunController.text.trim();
     request.fields['harga'] = _hargaController.text.trim();
 
-    // Handle image upload if present
     if (_imageFile != null) {
       String? mimeType = lookupMimeType(_imageFile!.path);
       if (mimeType != null) {
@@ -87,14 +94,11 @@ class _AddCarPageState extends State<AddCarPage> {
           _isLoading = false;
         });
 
-        // Menampilkan notifikasi sukses
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Mobil berhasil ditambahkan!')),
+          const SnackBar(content: Text('Mobil berhasil ditambahkan!')),
         );
 
-        // Setelah berhasil menambah data, kembali ke halaman utama dan lakukan refresh
-        Navigator.pushReplacementNamed(
-            context, '/home'); // Gunakan navigator untuk menggantikan halaman
+        Navigator.pushReplacementNamed(context, '/home');
       } else {
         setState(() {
           _isLoading = false;
@@ -104,7 +108,8 @@ class _AddCarPageState extends State<AddCarPage> {
     } catch (e) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Terjadi kesalahan jaringan: $e';
+        _errorMessage =
+            'Terjadi kesalahan jaringan. Silakan periksa koneksi Anda dan coba lagi.';
       });
     }
   }
@@ -236,9 +241,21 @@ class _AddCarPageState extends State<AddCarPage> {
               ),
             if (_errorMessage != null) ...[
               const SizedBox(height: 10),
-              Text(
-                _errorMessage!,
-                style: const TextStyle(color: Colors.red),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red[100],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red),
+                ),
+                child: Text(
+                  _errorMessage!,
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
               ),
             ],
           ],
