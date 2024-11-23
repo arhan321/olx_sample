@@ -55,7 +55,7 @@ class _AddCarPageState extends State<AddCarPage> {
 
     var request = http.MultipartRequest(
       'POST',
-      Uri.parse('https://api.triastrapersada.com/api/v1/mobil'),
+      Uri.parse('https://api.djncloud.my.id/api/v1/mobil'),
     );
 
     request.fields['nama'] = _namaController.text.trim();
@@ -102,15 +102,18 @@ class _AddCarPageState extends State<AddCarPage> {
       } else {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Gagal meng-upload data mobil';
+          _errorMessage = 'Gagal meng-upload data mobil.\n'
+              'Kode: ${response.statusCode}\n'
+              'Pesan: $responseData';
         });
+        debugPrint('Error response: $responseData');
       }
     } catch (e) {
       setState(() {
         _isLoading = false;
-        _errorMessage =
-            'Terjadi kesalahan jaringan. Silakan periksa koneksi Anda dan coba lagi.';
+        _errorMessage = 'Terjadi kesalahan: ${e.toString()}';
       });
+      debugPrint('Exception caught: ${e.toString()}');
     }
   }
 

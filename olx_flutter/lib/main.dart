@@ -72,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     try {
       final response = await http.get(
-        Uri.parse('https://api.triastrapersada.com/api/v1/mobil'),
+        Uri.parse('https://api.djncloud.my.id/api/v1/mobil'),
       );
 
       if (response.statusCode == 200) {
@@ -102,7 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _deleteCar(int id) async {
     final response = await http.delete(
-      Uri.parse('https://api.triastrapersada.com/api/v1/mobil/$id'),
+      Uri.parse('https://api.djncloud.my.id/api/v1/mobil/$id'),
     );
 
     if (response.statusCode == 200) {

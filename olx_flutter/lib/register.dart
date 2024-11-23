@@ -63,7 +63,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://api.triastrapersada.com/api/v1/account'),
+        Uri.parse('https://api.djncloud.my.id/api/v1/account'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': _emailController.text,

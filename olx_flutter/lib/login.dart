@@ -36,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://api.triastrapersada.com/api/v1/account/login'),
+        Uri.parse('https://api.djncloud.my.id/api/v1/account/login'),
         headers: {
           'Content-Type': 'application/json',
         },
