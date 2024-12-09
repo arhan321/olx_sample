@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'route/routes.dart';
+import 'package:intl/intl.dart';
 
 void main() {
   runApp(const MyApp());
@@ -133,6 +134,26 @@ class _MyHomePageState extends State<MyHomePage> {
     Navigator.pushReplacementNamed(context, AppRoutes.login);
   }
 
+  String _formatCurrency(dynamic price) {
+    if (price == null || price == '') {
+      return 'Tidak diketahui';
+    }
+
+    // Pastikan harga adalah angka
+    final parsedPrice = double.tryParse(price.toString());
+    if (parsedPrice == null) {
+      return 'Harga tidak valid';
+    }
+
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID', // Format Indonesia
+      symbol: 'Rp ', // Simbol Rupiah
+      decimalDigits: 0, // Tanpa desimal
+    );
+
+    return formatter.format(parsedPrice);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -209,7 +230,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         subtitle: Text(
-                          'Harga: ${car['harga'] ?? 'Tidak diketahui'}',
+                          'Harga: ${_formatCurrency(car['harga'])}',
                           style:
                               TextStyle(fontSize: 16, color: Colors.grey[700]),
                         ),
@@ -239,38 +260,63 @@ class _MyHomePageState extends State<MyHomePage> {
                               )
                             : Icon(Icons.image_not_supported,
                                 color: Colors.grey[500], size: 40),
-                        trailing: IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
-                          onPressed: () async {
-                            bool? confirmDelete = await showDialog<bool>(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: Text('Konfirmasi Hapus'),
-                                  content: Text(
-                                      'Apakah Anda yakin ingin menghapus mobil ini?'),
-                                  actions: [
-                                    TextButton(
-                                      child: Text('Batal'),
-                                      onPressed: () {
-                                        Navigator.of(context).pop(false);
-                                      },
-                                    ),
-                                    TextButton(
-                                      child: Text('Hapus'),
-                                      onPressed: () {
-                                        Navigator.of(context).pop(true);
-                                      },
-                                    ),
-                                  ],
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.delete, color: Colors.red),
+                              onPressed: () async {
+                                bool? confirmDelete = await showDialog<bool>(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text('Konfirmasi Hapus'),
+                                      content: Text(
+                                          'Apakah Anda yakin ingin menghapus mobil ini?'),
+                                      actions: [
+                                        TextButton(
+                                          child: Text('Batal'),
+                                          onPressed: () {
+                                            Navigator.of(context).pop(false);
+                                          },
+                                        ),
+                                        TextButton(
+                                          child: Text('Hapus'),
+                                          onPressed: () {
+                                            Navigator.of(context).pop(true);
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+
+                                if (confirmDelete == true) {
+                                  _deleteCar(car['id']);
+                                }
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.visibility, color: Colors.blue),
+                              onPressed: () {
+                                Navigator.pushNamed(
+                                  context,
+                                  AppRoutes.viewCar,
+                                  arguments: car,
                                 );
                               },
-                            );
-
-                            if (confirmDelete == true) {
-                              _deleteCar(car['id']);
-                            }
-                          },
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.edit, color: Colors.orange),
+                              onPressed: () {
+                                Navigator.pushNamed(
+                                  context,
+                                  AppRoutes.editCar,
+                                  arguments: car,
+                                );
+                              },
+                            ),
+                          ],
                         ),
                       ),
                     );

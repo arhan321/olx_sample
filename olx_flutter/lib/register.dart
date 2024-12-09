@@ -206,7 +206,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     child: Text('Daftar', style: TextStyle(fontSize: 16)),
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: Colors.blue[800], // Blue button color
+                      backgroundColor: Colors.blue[800],
                     ),
                   ),
                 ),
