@@ -197,7 +197,13 @@ class _LoginPageState extends State<LoginPage> {
                     width: 300,
                     child: ElevatedButton(
                       onPressed: _login,
-                      child: Text('Login', style: TextStyle(fontSize: 16)),
+                      child: Text(
+                        'Login',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue[800],
                         padding: EdgeInsets.symmetric(vertical: 14),
